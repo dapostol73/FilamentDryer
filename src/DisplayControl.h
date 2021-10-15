@@ -15,6 +15,7 @@
 
 #define NEO_LED_PIN 6
 #define NEO_LED_NUM 1
+#define NEO_LED_MAX 128
 
 Adafruit_NeoPixel pixels(NEO_LED_NUM, NEO_LED_PIN, NEO_GRBW + NEO_KHZ800);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -30,10 +31,23 @@ void displayLedColor(int red, int green, int blue, int time) {
   delay(time);
 }
 
+void displayLedPulse(int rate) {
+  float brightness = 0;
+  // ramp up
+  for (int i = 0; i <= rate; i++) {
+    brightness = cos((i / rate) * M_PI * 2);
+    brightness = (brightness * -0.5) + 0.5; 
+    brightness = pow(brightness, 2.0);
+    pixels.setBrightness(brightness * NEO_LED_MAX);
+    pixels.show();
+    delay(1);
+  }
+}
+
 void displayLedBlinking(int red, int green, int blue, int rate, int times) {
+  displayLedColor(red, green, blue, rate);
   for (int i = 0; i <= times; i++) {
-    displayLedColor(red, green, blue, rate);
-    displayLedColor(0, 0, 0, rate);
+    displayLedPulse(rate);
   }
 }
 
@@ -91,6 +105,7 @@ void displayScrollLine(int line) {
 void displayInitialize() {
   pixels.begin();
   pixels.clear();
+  pixels.setBrightness(NEO_LED_MAX);
   displayLedColor(128, 0, 0, 250);
   displayLedColor(0, 128, 0, 250);
   displayLedColor(0, 0, 128, 250);
