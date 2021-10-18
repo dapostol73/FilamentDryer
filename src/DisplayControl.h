@@ -13,7 +13,7 @@
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 
-#define NEO_LED_PIN 6
+#define NEO_LED_PIN 5
 #define NEO_LED_NUM 1
 #define NEO_LED_MAX 128
 
@@ -31,23 +31,25 @@ void displayLedColor(int red, int green, int blue, int time) {
   delay(time);
 }
 
-void displayLedPulse(int rate) {
-  float brightness = 0;
+void displayLedPulse(int red, int green, int blue, int rate) {
+  float brightness = 0.0;
   // ramp up
   for (int i = 0; i <= rate; i++) {
-    brightness = cos((i / rate) * M_PI * 2);
+    brightness = 1.0 * i;
+    brightness = cos((brightness / rate) * M_PI * 2);
     brightness = (brightness * -0.5) + 0.5; 
     brightness = pow(brightness, 2.0);
-    pixels.setBrightness(brightness * NEO_LED_MAX);
+    pixels.setBrightness(brightness*NEO_LED_MAX);
+    pixels.setPixelColor(0, pixels.Color(red, green, blue));
     pixels.show();
     delay(1);
   }
+  pixels.setBrightness(NEO_LED_MAX);
 }
 
 void displayLedBlinking(int red, int green, int blue, int rate, int times) {
-  displayLedColor(red, green, blue, rate);
   for (int i = 0; i <= times; i++) {
-    displayLedPulse(rate);
+    displayLedPulse(red, green, blue, rate);
   }
 }
 
@@ -122,7 +124,7 @@ void displayInitialize() {
   // Show initial display buffer contents on the screen --
   // the library initializes this with an Adafruit splash screen.
   display.display();
-  displayLedBlinking(0, 128, 128, 250, 8);
+  displayLedBlinking(255, 0, 0, 250, 8);
 
   // Clear the buffer
   display.clearDisplay();

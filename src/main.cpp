@@ -44,6 +44,13 @@ char secondsText[3];
 char displayText[100];
 
 void executeDebugInfo() {
+  if (digitalRead(selectButtonPin) == LOW) {
+    activeMode = MODE_WAIT; // stop sequence
+    displayLineInfo(1, F("Exit DBG!"));
+    displayClearLine(2);
+    delay(250);
+  }
+
   strcpy(displayText, "DBG - ");
   strcat(displayText, matChoice.Name);
   displayLineInfo(0, displayText, 1);
@@ -59,7 +66,7 @@ void executeDebugInfo() {
   }
 
   if (climateMeasureHeater(&heater) == true) {
-    dtostrf(heater, 1, 0, heaterText);
+    dtostrf(heater, 1, 4, heaterText);
     strcpy(displayText, heaterText);
     strcat(displayText, "\xF7""C ");
     displayLineInfo(2, displayText, 0);
@@ -273,7 +280,7 @@ void setup() {
   pinMode(minusButtonPin, INPUT_PULLUP);
   //Serial.println(F("System initialized"));
 
-  displayLedColor(0, 0, 128, 2000);
+  displayLedColor(255, 128, 0, 1000);
   displayLedClear();
 }
 
@@ -299,7 +306,6 @@ void loop() {
       executeTimeMode();
       break;
     case MODE_RUN:
-      executeDebugInfo();
       executeRunMode();
       break;
     default:

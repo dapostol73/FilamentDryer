@@ -2,24 +2,31 @@
 #include <SimpleDHT.h>
 
 //#define DHT_SENSOR_TYPE DHT11
-#define DHT_SENSOR_PIN 8
-#define THERMISTOR_PIN 0
+#define DHT_SENSOR_PIN 6
+#define HEATER_BLK_PIN 8
+#define HEATER_FAN_PIN 9
 
+#define THERMISTOR_PIN 0
 #define THERMISTOR_RESISTOR 10000.0
 #define THERMISTOR_VOLTAGE 5.0
 
 SimpleDHT11 dht11(DHT_SENSOR_PIN);
 
 bool climateMeasureHeater(float *temperature) {
-  int tempReading = analogRead(THERMISTOR_PIN);
-  // Serial.println(tempReading);
-  // This is OK
-  double voltage = 1023.0 / tempReading - 1.0;
-  double tempK = log(THERMISTOR_RESISTOR * voltage);
-  tempK = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * tempK * tempK )) * tempK );       //  Temp Kelvin
-  *temperature = float(tempK - 273.15);
+  int sensorValue = 0;
+  int samples = 5;
 
-  return true ;
+  for (int i = 0; i < samples; i++) {
+    sensorValue += analogRead(THERMISTOR_PIN);
+  }
+
+  sensorValue /=  samples;
+
+  double tempK = log(THERMISTOR_RESISTOR * (1024.0 / (1024.0 - sensorValue) - 1));
+  tempK = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * tempK * tempK )) * tempK );       //  Temp Kelvin
+  *temperature = tempK - 273.15;  
+
+  return true;
 }
 
 bool climateMeasureEnvironment(float *temperature, float *humidity) {
